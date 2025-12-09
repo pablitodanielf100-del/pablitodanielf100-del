@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Crea y lee cuentos interactivos con navegación por páginas">
+  <meta name="keywords" content="cuento, interactivo, lectura, páginas, historia">
+  <meta name="author" content="Pablitodanielf100">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pablitodanielf100-del.github.io/mi-cuento3/">
+  <meta property="og:title" content="Mi Cuento Interactivo">
+  <meta property="og:description" content="Crea y lee cuentos interactivos personalizados">
+  <meta property="og:image" content="https://pablitodanielf100-del.github.io/mi-cuento3/preview.jpg">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://pablitodanielf100-del.github.io/mi-cuento3/">
+  <meta property="twitter:title" content="Mi Cuento Interactivo">
+  <meta property="twitter:description" content="Crea y lee cuentos interactivos personalizados">
+  <meta property="twitter:image" content="https://pablitodanielf100-del.github.io/mi-cuento3/preview.jpg">
+  
+  <title>Mi Cuento Interactivo — Crea y Lee Historias</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/mi-cuento3/manifest.json">
+  <meta name="theme-color" content="#667eea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+            'pulse-slow': 'pulse 3s infinite'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+      -webkit-tap-highlight-color: transparent;
+      font-size: 16px;
+    }
+    
+    @media (max-width: 768px) {
+      html {
+        font-size: 14px;
+      }
+    }
+    
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    
+    .page-transition {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    }
+    
+    .text-gradient {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .page-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .page-shadow:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+    }
+    
+    .dot-navigation {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+    
+    .dot-navigation.active {
+      transform: scale(1.3);
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    }
+    
+    .upload-zone {
+      border: 2px dashed #cbd5e1;
+      transition: all 0.3s ease;
+    }
+    
+    .upload-zone.dragover {
+      border-color: var(--primary-color);
+      background-color: rgba(102, 126, 234, 0.1);
+      transform: scale(1.02);
+    }
+    
+    .image-preview {
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    
+    .modal-overlay {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+    
+    .progress-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      transition: width 0.5s ease;
+    }
+    
+    /* Animaciones personalizadas */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    }
+    
+    /* Mejoras para móviles */
+    @media (max-width: 640px) {
+      .mobile-stack {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .mobile-full {
+        width: 100%;
+      }
+    }
+    
+    /* Ajustes de impresión */
+    @media print {
+      header, footer, button, .no-print {
+        display: none !important;
+      }
+      
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      
+      #fullView {
+        display: block !important;
+      }
+      
+      #singleView {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-blue-50 to-purple-50 text-gray-800">
+  <!-- Barra de navegación -->
+  <header class="sticky top-0 z-40 glass-effect border-b border-gray-200 shadow-sm">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <h1 class="text-xl font-bold text-gradient">📖 Mi Cuento</h1>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-2 sm:space-x-4">
+          <button id="exportBtn" class="hidden sm:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+            📤 Exportar
+          </button>
+          <button id="importBtn" class="hidden sm:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+            📥 Importar
+          </button>
+          <button id="editBtn" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white gradient-bg hover:opacity-90 transition-all duration-200 shadow-md">
+            ✏️ Editar
+          </button>
+          <div class="flex items-center space-x-2">
+            <button id="prevBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+              ←
+            </button>
+            <button id="nextBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-full text-white gradient-bg hover:opacity-90 transition-all duration-200 shadow-md">
+              →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <!-- Barra de progreso -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-3">
+        <span id="progressLabel" class="text-sm font-medium text-gray-600">Página 1 de 8</span>
+        <div class="flex items-center space-x-2">
+          <button id="printBtn" class="text-sm text-gray-600 hover:text-gray-800 transition-colors">
+            🖨️ Imprimir
+          </button>
+          <button id="toggleViewBtn" class="text-sm px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors duration-200">
+            📚 Ver todo
+          </button>
+        </div>
+      </div>
+      <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div id="progressBar" class="progress-bar h-full" style="width: 12.5%;"></div>
+      </div>
+    </div>
+
+    <!-- Vista de página única -->
+    <section id="singleView" class="page-transition">
+      <div class="max-w-3xl mx-auto">
+        <article id="pageContainer" class="bg-white rounded-2xl page-shadow overflow-hidden">
+          <div class="relative h-64 sm:h-80 md:h-96">
+            <img id="pageImage" alt="Imagen de la página" class="w-full h-full object-cover" 
+                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='800' height='400' fill='%23667eea'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='24' font-family='sans-serif'%3EImagen del cuento%3C/text%3E%3C/svg%3E">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <h2 id="pageTitle" class="text-3xl font-bold mb-2 drop-shadow-lg">Comienzo</h2>
+              <div class="flex items-center text-sm opacity-90">
+                <span id="pageNumber">Página 1</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-6 sm:p-8">
+            <div class="prose prose-lg max-w-none">
+              <p id="pageText" class="text-gray-700 leading-relaxed text-lg">Era una tarde silenciosa. El viento traía el olor de los eucaliptos y el río murmuraba con paciencia. En la casa, sólo se oía el reloj marcando el paso del tiempo.</p>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-100">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <button id="prevBtn2" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium transition-colors duration-200">
+                  ← Anterior
+                </button>
+                
+                <div id="dots" class="flex items-center space-x-3"></div>
+                
+                <button id="nextBtn2" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-white gradient-bg hover:opacity-90 font-medium transition-all duration-200 shadow-md">
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+        
+        <!-- Instrucciones -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+          <p class="text-sm text-blue-700 text-center">
+            💡 Usa las teclas ← → para navegar, o desliza en móvil
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vista completa del cuento -->
+    <section id="fullView" class="hidden">
+      <div class="space-y-8">
+        <!-- Las páginas completas se insertarán aquí -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de edición -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-overlay">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <!-- Cabecera del modal -->
+        <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800">Editor de Cuento</h2>
+            <p class="text-sm text-gray-600 mt-1">Organiza y personaliza tu historia</p>
+          </div>
+          <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-3xl leading-none transition-colors">
+            &times;
+          </button>
+        </div>
+        
+        <!-- Contenido del editor -->
+        <div id="pagesEditor" class="p-6 space-y-6 overflow-y-auto" style="max-height: calc(90vh - 140px)">
+          <!-- Las páginas del editor se insertarán aquí -->
+        </div>
+        
+        <!-- Pie del modal -->
+        <div class="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center space-x-3">
+            <button id="addPageBtn" class="inline-flex items-center px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition-colors duration-200">
+              + Nueva página
+            </button>
+            <button id="reorderBtn" class="inline-flex items-center px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-medium transition-colors duration-200">
+              🔄 Reordenar
+            </button>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button id="cancelBtn" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+              Cancelar
+            </button>
+            <button id="saveBtn" class="px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 text-white font-medium transition-all duration-200 shadow-md">
+              💾 Guardar cambios
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de exportación/importación -->
+  <div id="dataModal" class="hidden fixed inset-0 z-50 modal-overlay">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div class="border-b border-gray-200 p-6">
+          <h2 class="text-2xl font-bold text-gray-800" id="dataModalTitle">Exportar Cuento</h2>
+        </div>
+        <div class="p-6">
+          <div id="exportContent" class="hidden">
+            <p class="text-sm text-gray-600 mb-4">Copia este JSON para guardar tu cuento:</p>
+            <textarea id="exportJson" class="w-full h-48 p-3 font-mono text-sm bg-gray-50 border border-gray-300 rounded-lg resize-none" readonly></textarea>
+            <button id="copyBtn" class="mt-4 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+              📋 Copiar al portapapeles
+            </button>
+          </div>
+          <div id="importContent" class="hidden">
+            <p class="text-sm text-gray-600 mb-4">Pega el JSON de tu cuento guardado:</p>
+            <textarea id="importJson" class="w-full h-48 p-3 font-mono text-sm border border-gray-300 rounded-lg resize-none" placeholder='[{"titulo": "...", "texto": "...", "imagen": "..."}]'></textarea>
+            <button id="confirmImportBtn" class="mt-4 w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+              📥 Importar cuento
+            </button>
+          </div>
+        </div>
+        <div class="border-t border-gray-200 p-6 flex justify-end">
+          <button id="closeDataModal" class="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-12 py-8 border-t border-gray-200 bg-white">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <p class="text-gray-600 mb-2">📖 Cuento Interactivo • Creado con HTML, CSS y JavaScript</p>
+      <p class="text-sm text-gray-500">Usa las flechas del teclado, desliza en móvil o los botones para navegar. Los cambios se guardan automáticamente.</p>
+      <div class="mt-4 flex justify-center space-x-6">
+        <button id="resetBtn" class="text-sm text-red-600 hover:text-red-800 transition-colors">
+          🔄 Restablecer valores
+        </button>
+        <button id="helpBtn" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+          ❓ Ayuda
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ============================================
+    // CONFIGURACIÓN Y ESTADO
+    // ============================================
+    
+    const STORAGE_KEY = 'cuento_interactivo_avanzado';
+    const DEFAULT_CUENTO = [
+      {
+        titulo: "Comienzo",
+        texto: "Era una tarde silenciosa. El viento traía el olor de los eucaliptos y el río murmuraba con paciencia. En la casa, sólo se oía el reloj marcando el paso del tiempo.",
+        imagen: null
+      },
+      {
+        titulo: "El primer encuentro",
+        texto: "En el jardín, una figura conocida apareció al borde del sendero. No había prisa; ambos sabían que, a veces, llegar es más importante que explicar.",
+        imagen: null
+      },
+      {
+        titulo: "La carta",
+        texto: "Sobre la mesa, una carta sin remitente. Las palabras parecían escondidas entre líneas, esperando el momento justo para ser leídas en voz alta.",
+        imagen: null
+      },
+      {
+        titulo: "El río dice",
+        texto: "El río, siempre discreto, traía historias de otros pueblos. Sus rumores eran un mapa para quien quisiera escucharlos sin miedo.",
+        imagen: null
+      },
+      {
+        titulo: "Memoria",
+        texto: "La memoria juega con luces y sombras. Algunos recuerdos se vuelven claros cuando se los mira con ternura.",
+        imagen: null
+      },
+      {
+        titulo: "Decisión",
+        texto: "Elegir no es negar; es abrir una puerta y aceptar que habrá otras que queden cerradas por un rato.",
+        imagen: null
+      },
+      {
+        titulo: "Camino",
+        texto: "El camino hacia la ciudad parecía más corto esa mañana. Tal vez porque el corazón, por fin, había dejado de resistirse.",
+        imagen: null
+      },
+      {
+        titulo: "Cierre",
+        texto: "La noche llegó con calma. Hubo una última mirada, una palabra sencilla, y el silencio volvió a ser un lugar seguro.",
+        imagen: null
+      }
+    ];
+
+    let cuento = [];
+    let paginaActual = 0;
+    let modoCompleto = false;
+    let isReordering = false;
+
+    // ============================================
+    // REFERENCIAS A ELEMENTOS DEL DOM
+    // ============================================
+    
+    const pageContainer = document.getElementById("pageContainer");
+    const pageImage = document.getElementById("pageImage");
+    const pageTitle = document.getElementById("pageTitle");
+    const pageText = document.getElementById("pageText");
+    const pageNumber = document.getElementById("pageNumber");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn2 = document.getElementById("prevBtn2");
+    const nextBtn2 = document.getElementById("nextBtn2");
+    const toggleViewBtn = document.getElementById("toggleViewBtn");
+    const editBtn = document.getElementById("editBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const importBtn = document.getElementById("importBtn");
+    const printBtn = document.getElementById("printBtn");
+
+    const dots = document.getElementById("dots");
+    const progressBar = document.getElementById("progressBar");
+    const progressLabel = document.getElementById("progressLabel");
+
+    const singleView = document.getElementById("singleView");
+    const fullView = document.getElementById("fullView");
+
+    const editModal = document.getElementById("editModal");
+    const closeModal = document.getElementById("closeModal");
+    const pagesEditor = document.getElementById("pagesEditor");
+    const addPageBtn = document.getElementById("addPageBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const reorderBtn = document.getElementById("reorderBtn");
+
+    const dataModal = document.getElementById("dataModal");
+    const closeDataModal = document.getElementById("closeDataModal");
+    const exportContent = document.getElementById("exportContent");
+    const importContent = document.getElementById("importContent");
+    const exportJson = document.getElementById("exportJson");
+    const importJson = document.getElementById("importJson");
+    const copyBtn = document.getElementById("copyBtn");
+    const confirmImportBtn = document.getElementById("confirmImportBtn");
+    const dataModalTitle = document.getElementById("dataModalTitle");
+
+    const resetBtn = document.getElementById("resetBtn");
+    const helpBtn = document.getElementById("helpBtn");
+
+    // ============================================
+    // FUNCIONALIDADES DE PERSISTENCIA
+    // ============================================
+    
+    function guardarEnLocalStorage() {
+      try {
+        const datos = {
+          cuento: cuento,
+          ultimaPagina: paginaActual,
+          fechaModificacion: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+      } catch (error) {
+        console.warn("No se pudo guardar en localStorage:", error);
+      }
+    }
+
+    function cargarDesdeLocalStorage() {
+      try {
+        const datos = localStorage.getItem(STORAGE_KEY);
+        if (datos) {
+          const parsed = JSON.parse(datos);
+          if (parsed.cuento && Array.isArray(parsed.cuento) && parsed.cuento.length > 0) {
+            cuento = parsed.cuento;
+            paginaActual = parsed.ultimaPagina || 0;
+            return true;
+          }
+        }
+      } catch (error) {
+        console.warn("Error al cargar desde localStorage:", error);
+      }
+      return false;
+    }
+
+    function inicializarCuento() {
+      const cargado = cargarDesdeLocalStorage();
+      if (!cargado) {
+        cuento = JSON.parse(JSON.stringify(DEFAULT_CUENTO));
+        paginaActual = 0;
+      }
+      renderizarPagina(paginaActual, false);
+      actualizarUI();
+    }
+
+    // ============================================
+    // FUNCIONES DE RENDERIZADO
+    // ============================================
+    
+    function renderizarPagina(indice, animar = true) {
+      if (cuento.length === 0) {
+        mostrarCuentoVacio();
+        return;
+      }
+
+      const pagina = cuento[indice];
+      if (!pagina) return;
+
+      if (animar) {
+        pageContainer.style.opacity = '0';
+        pageContainer.style.transform = 'translateY(10px)';
+        
+        setTimeout(() => {
+          actualizarContenidoPagina(pagina, indice);
+          pageContainer.style.opacity = '1';
+          pageContainer.style.transform = 'translateY(0)';
+          pageContainer.style.transition = 'all 0.3s ease';
+        }, 50);
+      } else {
+        actualizarContenidoPagina(pagina, indice);
+      }
+
+      paginaActual = indice;
+      actualizarUI();
+      guardarEnLocalStorage();
+    }
+
+    function actualizarContenidoPagina(pagina, indice) {
+      pageImage.src = pagina.imagen || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="400"%3E%3Crect width="800" height="400" fill="%23667eea"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="white" font-size="24" font-family="sans-serif"%3EImagen del cuento%3C/text%3E%3C/svg%3E';
+      pageImage.alt = `Ilustración: ${pagina.titulo}`;
+      pageTitle.textContent = pagina.titulo;
+      pageText.textContent = pagina.texto;
+      pageNumber.textContent = `Página ${indice + 1} de ${cuento.length}`;
+    }
+
+    function mostrarCuentoVacio() {
+      pageTitle.textContent = "Sin contenido";
+      pageText.textContent = "Añade páginas desde el editor para comenzar tu cuento.";
+      pageNumber.textContent = "Página 0 de 0";
+      pageImage.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="400"%3E%3Crect width="800" height="400" fill="%239ca3af"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="white" font-size="24" font-family="sans-serif"%3ECuento vacío%3C/text%3E%3C/svg%3E';
+    }
+
+    function renderizarCuentoCompleto() {
+      fullView.innerHTML = "";
+      cuento.forEach((pagina, indice) => {
+        const articulo = document.createElement("article");
+        articulo.className = "bg-white rounded-2xl page-shadow overflow-hidden page-transition";
+        articulo.style.animationDelay = `${indice * 0.1}s`;
+        
+        articulo.innerHTML = `
+          <div class="relative h-48 sm:h-56 md:h-64">
+            <img src="${pagina.imagen || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22400%22%3E%3Crect width=%22800%22 height=%22400%22 fill=%22%23764ba2%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2224%22%3EImagen%3C/text%3E%3C/svg%3E'}" 
+                 alt="${pagina.titulo}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
+              <h3 class="text-xl font-bold">${indice + 1}. ${pagina.titulo}</h3>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-gray-700 leading-relaxed">${pagina.texto}</p>
+          </div>
+        `;
+        
+        fullView.appendChild(articulo);
+      });
+    }
+
+    function renderizarPuntosNavegacion() {
+      dots.innerHTML = "";
+      cuento.forEach((_, indice) => {
+        const punto = document.createElement("button");
+        punto.className = `dot-navigation focus:outline-none focus:ring-2 focus:ring-blue-500 ${indice === paginaActual ? 'active' : 'bg-gray-300 hover:bg-gray-400'}`;
+        punto.setAttribute("aria-label", `Ir a la página ${indice + 1}`);
+        punto.addEventListener("click", () => renderizarPagina(indice));
+        dots.appendChild(punto);
+      });
+    }
+
+    function actualizarUI() {
+      const total = cuento.length;
+      const porcentaje = total > 0 ? ((paginaActual + 1) / total) * 100 : 0;
+      
+      progressLabel.textContent = total > 0 ? `Página ${paginaActual + 1} de ${total}` : "Sin páginas";
+      progressBar.style.width = `${porcentaje}%`;
+      
+      const deshabilitarAnterior = paginaActual === 0;
+      const deshabilitarSiguiente = total === 0 || paginaActual === total - 1;
+      
+      [prevBtn, prevBtn2].forEach(btn => {
+        btn.disabled = deshabilitarAnterior;
+        btn.style.opacity = deshabilitarAnterior ? "0.5" : "1";
+      });
+      
+      [nextBtn, nextBtn2].forEach(btn => {
+        btn.disabled = deshabilitarSiguiente;
+        btn.style.opacity = deshabilitarSiguiente ? "0.5" : "1";
+      });
+      
+      renderizarPuntosNavegacion();
+    }
+
+    // ============================================
+    // FUNCIONES DE NAVEGACIÓN
+    // ============================================
+    
+    function irAnterior() {
+      if (paginaActual > 0) {
+        renderizarPagina(paginaActual - 1);
+      }
+    }
+
+    function irSiguiente() {
+      if (paginaActual < cuento.length - 1) {
+        renderizarPagina(paginaActual + 1);
+      }
+    }
+
+    function alternarVistaCompleta() {
+      modoCompleto = !modoCompleto;
+      
+      if (modoCompleto) {
+        toggleViewBtn.textContent = "📖 Ver página actual";
+        singleView.classList.add("hidden");
+        fullView.classList.remove("hidden");
+        renderizarCuentoCompleto();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        toggleViewBtn.textContent = "📚 Ver todo el cuento";
+        fullView.classList.add("hidden");
+        singleView.classList.remove("hidden");
+        renderizarPagina(paginaActual, false);
+      }
+    }
+
+    // ============================================
+    // EDITOR DE PÁGINAS
+    // ============================================
+    
+    function renderizarEditor() {
+      pagesEditor.innerHTML = "";
+      
+      if (cuento.length === 0) {
+        pagesEditor.innerHTML = `
+          <div class="text-center py-8">
+            <p class="text-gray-500 mb-4">No hay páginas en el cuento.</p>
+            <button id="addFirstPage" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              + Crear primera página
+            </button>
+          </div>
+        `;
+        
+        document.getElementById("addFirstPage")?.addEventListener("click", () => {
+          cuento.push({
+            titulo: "Primera página",
+            texto: "Comienza tu historia aquí...",
+            imagen: null
+          });
+          renderizarEditor();
+        });
+        
+        return;
+      }
+      
+      cuento.forEach((pagina, indice) => {
+        const divPagina = document.createElement("div");
+        divPagina.className = "border border-gray-300 rounded-xl p-5 bg-gray-50 hover:bg-white transition-colors";
+        divPagina.dataset.index = indice;
+        
+        if (isReordering) {
+          divPagina.classList.add("cursor-move", "reorder-item");
+          divPagina.draggable = true;
+        }
+        
+        divPagina.innerHTML = `
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-3">
+              <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold">
+                ${indice + 1}
+              </span>
+              <h3 class="text-lg font-semibold">Editor de página</h3>
+            </div>
+            <div class="flex items-center space-x-2">
+              ${indice > 0 ? `
+                <button class="move-up text-gray-600 hover:text-blue-600 transition-colors" title="Mover arriba">
+                  ↑
+                </button>
+              ` : ''}
+              ${indice < cuento.length - 1 ? `
+                <button class="move-down text-gray-600 hover:text-blue-600 transition-colors" title="Mover abajo">
+                  ↓
+                </button>
+              ` : ''}
+              <button class="delete-page text-red-600 hover:text-red-800 transition-colors font-medium" data-index="${indice}">
+                🗑️ Eliminar
+              </button>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Título de la página</label>
+              <input type="text" class="page-title w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                     value="${pagina.titulo}" data-index="${indice}" maxlength="100">
+              <div class="text-xs text-gray-500 mt-1 flex justify-between">
+                <span>Aparecerá en grande sobre la imagen</span>
+                <span class="char-count">${pagina.titulo.length}/100</span>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Texto de la página</label>
+              <textarea class="page-text w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                        rows="4" data-index="${indice}" maxlength="2000">${pagina.texto}</textarea>
+              <div class="text-xs text-gray-500 mt-1 flex justify-between">
+                <span>El contenido principal de tu historia</span>
+                <span class="char-count">${pagina.texto.length}/2000</span>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Imagen (opcional)</label>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div class="image-preview-container">
+                  ${pagina.imagen ? `
+                    <div class="relative">
+                      <img src="${pagina.imagen}" class="image-preview border-2 border-gray-300 rounded-lg">
+                      <button type="button" class="remove-image absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600" data-index="${indice}">✕</button>
+                    </div>
+                  ` : `
+                    <div class="w-32 h-32 bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-500">
+                      <span class="text-3xl mb-2">🖼️</span>
+                      <span class="text-xs text-center px-2">Sin imagen</span>
+                    </div>
+                  `}
+                </div>
+                
+                <div class="flex-1">
+                  <div class="upload-zone border-2 border-dashed border-gray-400 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
+                    <input type="file" accept="image/*" class="page-image hidden" data-index="${indice}">
+                    <div class="upload-content">
+                      <p class="text-sm text-gray-700 mb-1">📤 Arrastra una imagen o haz clic para seleccionar</p>
+                      <p class="text-xs text-gray-500">PNG, JPG o GIF • Máximo 2MB</p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">Una imagen horizontal queda mejor. Puedes usar una URL o subir desde tu dispositivo.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        pagesEditor.appendChild(divPagina);
+      });
+      
+      // Configurar eventos de los elementos del editor
+      configurarEventosEditor();
+      
+      if (isReordering) {
+        configurarArrastre();
+      }
+    }
+
+    function configurarEventosEditor() {
+      // Eventos de entrada de texto
+      document.querySelectorAll(".page-title").forEach(input => {
+        input.addEventListener("input", function() {
+          const indice = parseInt(this.dataset.index);
+          cuento[indice].titulo = this.value;
+          this.nextElementSibling.querySelector(".char-count").textContent = `${this.value.length}/100`;
+        });
+      });
+      
+      document.querySelectorAll(".page-text").forEach(textarea => {
+        textarea.addEventListener("input", function() {
+          const indice = parseInt(this.dataset.index);
+          cuento[indice].texto = this.value;
+          this.nextElementSibling.querySelector(".char-count").textContent = `${this.value.length}/2000`;
+        });
+      });
+      
+      // Eventos de imágenes
+      document.querySelectorAll(".upload-zone").forEach(zone => {
+        const input = zone.querySelector(".page-image");
+        const indice = parseInt(input.dataset.index);
+        
+        zone.addEventListener("click", () => input.click());
+        zone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          zone.classList.add("dragover");
+        });
+        zone.addEventListener("dragleave", () => {
+          zone.classList.remove("dragover");
+        });
+        zone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          zone.classList.remove("dragover");
+          if (e.dataTransfer.files.length > 0) {
+            procesarImagen(e.dataTransfer.files[0], indice);
+          }
+        });
+        
+        input.addEventListener("change", (e) => {
+          if (e.target.files.length > 0) {
+            procesarImagen(e.target.files[0], indice);
+          }
+        });
+      });
+      
+      // Botones de eliminar imagen
+      document.querySelectorAll(".remove-image").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const indice = parseInt(this.dataset.index);
+          cuento[indice].imagen = null;
+          renderizarEditor();
+        });
+      });
+      
+      // Botones de eliminar página
+      document.querySelectorAll(".delete-page").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const indice = parseInt(this.dataset.index);
+          if (cuento.length <= 1) {
+            alert("No puedes eliminar la única página. Agrega otra página primero.");
+            return;
+          }
+          
+          if (confirm(`¿Eliminar la página "${cuento[indice].titulo}"?`)) {
+            cuento.splice(indice, 1);
+            if (paginaActual >= cuento.length) {
+              paginaActual = cuento.length - 1;
+            }
+            renderizarEditor();
+            actualizarUI();
+          }
+        });
+      });
+      
+      // Botones de mover páginas
+      document.querySelectorAll(".move-up").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const divPagina = this.closest("[data-index]");
+          const indice = parseInt(divPagina.dataset.index);
+          if (indice > 0) {
+            [cuento[indice], cuento[indice - 1]] = [cuento[indice - 1], cuento[indice]];
+            renderizarEditor();
+          }
+        });
+      });
+      
+      document.querySelectorAll(".move-down").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const divPagina = this.closest("[data-index]");
+          const indice = parseInt(divPagina.dataset.index);
+          if (indice < cuento.length - 1) {
+            [cuento[indice], cuento[indice + 1]] = [cuento[indice + 1], cuento[indice]];
+            renderizarEditor();
+          }
+        });
+      });
+    }
+
+    function configurarArrastre() {
+      const items = document.querySelectorAll(".reorder-item");
+      let itemArrastrado = null;
+      
+      items.forEach(item => {
+        item.addEventListener("dragstart", function() {
+          itemArrastrado = this;
+          setTimeout(() => this.style.opacity = "0.4", 0);
+        });
+        
+        item.addEventListener("dragend", function() {
+          setTimeout(() => {
+            itemArrastrado.style.opacity = "1";
+            itemArrastrado = null;
+          }, 0);
+        });
+        
+        item.addEventListener("dragover", function(e) {
+          e.preventDefault();
+        });
+        
+        item.addEventListener("dragenter", function(e) {
+          e.preventDefault();
+          if (this !== itemArrastrado) {
+            this.style.borderTop = "2px solid #3b82f6";
+          }
+        });
+        
+        item.addEventListener("dragleave", function() {
+          this.style.borderTop = "";
+        });
+        
+        item.addEventListener("drop", function(e) {
+          e.preventDefault();
+          this.style.borderTop = "";
+          
+          if (this !== itemArrastrado) {
+            const indiceDe = parseInt(itemArrastrado.dataset.index);
+            const indiceA = parseInt(this.dataset.index);
+            
+            // Reordenar array
+            const [elementoMovido] = cuento.splice(indiceDe, 1);
+            cuento.splice(indiceA, 0, elementoMovido);
+            
+            // Actualizar editor
+            renderizarEditor();
+          }
+        });
+      });
+    }
+
+    function procesarImagen(archivo, indice) {
+      // Validar tipo y tamaño
+      const tiposPermitidos = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+      const tamanoMaximo = 2 * 1024 * 1024; // 2MB
+      
+      if (!tiposPermitidos.includes(archivo.type)) {
+        alert("Solo se permiten imágenes (JPG, PNG, GIF, WebP)");
+        return;
+      }
+      
+      if (archivo.size > tamanoMaximo) {
+        alert("La imagen es demasiado grande. Máximo 2MB.");
+        return;
+      }
+      
+      const lector = new FileReader();
+      lector.onload = function(e) {
+        cuento[indice].imagen = e.target.result;
+        renderizarEditor();
+      };
+      lector.readAsDataURL(archivo);
+    }
+
+    // ============================================
+    // FUNCIONES DE IMPORTACIÓN/EXPORTACIÓN
+    // ============================================
+    
+    function mostrarExportar() {
+      dataModalTitle.textContent = "Exportar Cuento";
+      exportContent.classList.remove("hidden");
+      importContent.classList.add("hidden");
+      
+      const datosExportar = {
+        cuento: cuento,
+        metadata: {
+          version: "1.0",
+          fechaExportacion: new Date().toISOString(),
+          totalPaginas: cuento.length
+        }
+      };
+      
+      exportJson.value = JSON.stringify(datosExportar, null, 2);
+      dataModal.classList.remove("hidden");
+    }
+
+    function mostrarImportar() {
+      dataModalTitle.textContent = "Importar Cuento";
+      importContent.classList.remove("hidden");
+      exportContent.classList.add("hidden");
+      importJson.value = "";
+      dataModal.classList.remove("hidden");
+    }
+
+    function copiarAlPortapapeles() {
+      exportJson.select();
+      exportJson.setSelectionRange(0, 99999);
+      
+      try {
+        navigator.clipboard.writeText(exportJson.value).then(() => {
+          copyBtn.textContent = "✓ Copiado!";
+          copyBtn.classList.remove("bg-blue-600");
+          copyBtn.classList.add("bg-green-600");
+          
+          setTimeout(() => {
+            copyBtn.textContent = "📋 Copiar al portapapeles";
+            copyBtn.classList.remove("bg-green-600");
+            copyBtn.classList.add("bg-blue-600");
+          }, 2000);
+        });
+      } catch (err) {
+        // Fallback para navegadores antiguos
+        document.execCommand("copy");
+        alert("Texto copiado al portapapeles");
+      }
+    }
+
+    function importarCuento() {
+      try {
+        const datos = JSON.parse(importJson.value);
+        
+        // Validar estructura
+        if (!datos.cuento || !Array.isArray(datos.cuento)) {
+          throw new Error("Formato inválido: se esperaba un array 'cuento'");
+        }
+        
+        // Validar cada página
+        for (let i = 0; i < datos.cuento.length; i++) {
+          const pagina = datos.cuento[i];
+          if (typeof pagina.titulo !== 'string' || typeof pagina.texto !== 'string') {
+            throw new Error(`Página ${i + 1} tiene campos inválidos`);
+          }
+        }
+        
+        // Reemplazar cuento actual
+        cuento = datos.cuento;
+        paginaActual = 0;
+        
+        // Guardar y actualizar
+        guardarEnLocalStorage();
+        renderizarPagina(0, false);
+        if (modoCompleto) {
+          renderizarCuentoCompleto();
+        }
+        
+        dataModal.classList.add("hidden");
+        mostrarNotificacion("Cuento importado con éxito", "success");
+        
+      } catch (error) {
+        alert(`Error al importar: ${error.message}`);
+      }
+    }
+
+    // ============================================
+    // FUNCIONES AUXILIARES
+    // ============================================
+    
+    function mostrarNotificacion(mensaje, tipo = "info") {
+      // Crear notificación
+      const notificacion = document.createElement("div");
+      notificacion.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white animate-slide-up ${tipo === "success" ? "bg-green-500" : "bg-blue-500"}`;
+      notificacion.textContent = mensaje;
+      
+      document.body.appendChild(notificacion);
+      
+      // Eliminar después de 3 segundos
+      setTimeout(() => {
+        notificacion.style.opacity = "0";
+        notificacion.style.transition = "opacity 0.3s";
+        setTimeout(() => notificacion.remove(), 300);
+      }, 3000);
+    }
+
+    function restablecerValores() {
+      if (confirm("¿Restablecer el cuento a los valores por defecto? Se perderán todos los cambios.")) {
+        cuento = JSON.parse(JSON.stringify(DEFAULT_CUENTO));
+        paginaActual = 0;
+        localStorage.removeItem(STORAGE_KEY);
+        renderizarPagina(0, false);
+        if (modoCompleto) {
+          renderizarCuentoCompleto();
+        }
+        mostrarNotificacion("Cuento restablecido", "success");
+      }
+    }
+
+    function mostrarAyuda() {
+      const mensaje = `🎮 CONTROLES DE NAVEGACIÓN:
+• Flechas ← → del teclado: Navegar páginas
+• Deslizar horizontal en móvil: Cambiar página
+• Botones Anterior/Siguiente: Navegación manual
+• Puntos debajo: Saltar a página específica
+
+✏️ EDITOR:
+• Haz clic en "Editar" para modificar contenido
+• Arrastra imágenes o selecciona archivos
+• Reordena páginas con ↑↓ o arrastrando
+• Elimina páginas con 🗑️
+
+💾 GUARDADO:
+• Los cambios se guardan automáticamente
+• Exporta/Importa para respaldo
+• Funciona offline en tu navegador`;
+      
+      alert(mensaje);
+    }
+
+    // ============================================
+    // CONFIGURACIÓN DE EVENT LISTENERS
+    // ============================================
+    
+    function configurarEventListeners() {
+      // Navegación
+      prevBtn.addEventListener("click", irAnterior);
+      prevBtn2.addEventListener("click", irAnterior);
+      nextBtn.addEventListener("click", irSiguiente);
+      nextBtn2.addEventListener("click", irSiguiente);
+      toggleViewBtn.addEventListener("click", alternarVistaCompleta);
+      
+      // Editor
+      editBtn.addEventListener("click", () => {
+        editModal.classList.remove("hidden");
+        isReordering = false;
+        renderizarEditor();
+      });
+      
+      closeModal.addEventListener("click", () => {
+        editModal.classList.add("hidden");
+        isReordering = false;
+      });
+      
+      cancelBtn.addEventListener("click", () => {
+        editModal.classList.add("hidden");
+        isReordering = false;
+        // Recargar desde storage para descartar cambios no guardados
+        cargarDesdeLocalStorage();
+        renderizarPagina(paginaActual, false);
+      });
+      
+      addPageBtn.addEventListener("click", () => {
+        cuento.push({
+          titulo: `Página ${cuento.length + 1}`,
+          texto: "Escribe el contenido de esta página...",
+          imagen: null
+        });
+        renderizarEditor();
+        // Desplazar al final
+        pagesEditor.lastElementChild.scrollIntoView({ behavior: "smooth" });
+      });
+      
+      reorderBtn.addEventListener("click", () => {
+        isReordering = !isReordering;
+        reorderBtn.textContent = isReordering ? "✅ Terminar reorden" : "🔄 Reordenar";
+        renderizarEditor();
+      });
+      
+      saveBtn.addEventListener("click", () => {
+        // Validar que todas las páginas tengan título
+        let valido = true;
+        cuento.forEach((pagina, indice) => {
+          if (!pagina.titulo.trim()) {
+            alert(`La página ${indice + 1} necesita un título`);
+            valido = false;
+          }
+        });
+        
+        if (valido) {
+          guardarEnLocalStorage();
+          editModal.classList.add("hidden");
+          isReordering = false;
+          renderizarPagina(paginaActual, false);
+          mostrarNotificacion("Cambios guardados", "success");
+        }
+      });
+      
+      // Exportar/Importar
+      if (exportBtn) exportBtn.addEventListener("click", mostrarExportar);
+      if (importBtn) importBtn.addEventListener("click", mostrarImportar);
+      printBtn.addEventListener("click", () => window.print());
+      
+      closeDataModal.addEventListener("click", () => {
+        dataModal.classList.add("hidden");
+      });
+      
+      copyBtn.addEventListener("click", copiarAlPortapapeles);
+      confirmImportBtn.addEventListener("click", importarCuento);
+      
+      // Utilidades
+      resetBtn.addEventListener("click", restablecerValores);
+      helpBtn.addEventListener("click", mostrarAyuda);
+      
+      // Navegación por teclado
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") {
+          return; // No interferir con entradas de texto
+        }
+        
+        switch(e.key) {
+          case "ArrowLeft":
+            irAnterior();
+            break;
+          case "ArrowRight":
+            irSiguiente();
+            break;
+          case "Home":
+            renderizarPagina(0);
+            break;
+          case "End":
+            renderizarPagina(cuento.length - 1);
+            break;
+          case "Escape":
+            if (!editModal.classList.contains("hidden")) {
+              editModal.classList.add("hidden");
+              isReordering = false;
+            }
+            if (!dataModal.classList.contains("hidden")) {
+              dataModal.classList.add("hidden");
+            }
+            break;
+        }
+      });
+      
+      // Gestos táctiles
+      let inicioX = null;
+      const umbral = 50; // Mínimo desplazamiento para cambiar de página
+      
+      pageContainer.addEventListener("touchstart", (e) => {
+        inicioX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      pageContainer.addEventListener("touchmove", (e) => {
+        if (inicioX === null) return;
+        
+        const desplazamientoX = e.touches[0].clientX - inicioX;
+        // Indicador visual de desplazamiento
+        if (Math.abs(desplazamientoX) > 20) {
+          pageContainer.style.transform = `translateX(${desplazamientoX * 0.3}px)`;
+        }
+      }, { passive: true });
+      
+      pageContainer.addEventListener("touchend", (e) => {
+        if (inicioX === null) return;
+        
+        const finX = e.changedTouches[0].clientX;
+        const desplazamiento = finX - inicioX;
+        
+        // Restablecer transformación
+        pageContainer.style.transform = "";
+        
+        if (Math.abs(desplazamiento) > umbral) {
+          if (desplazamiento > 0) {
+            irAnterior();
+          } else {
+            irSiguiente();
+          }
+        }
+        
+        inicioX = null;
+      }, { passive: true });
+      
+      // Cerrar modales haciendo clic fuera
+      window.addEventListener("click", (e) => {
+        if (e.target === editModal) {
+          editModal.classList.add("hidden");
+          isReordering = false;
+        }
+        if (e.target === dataModal) {
+          dataModal.classList.add("hidden");
+        }
+      });
+      
+      // Prevenir zoom no deseado en móviles
+      document.addEventListener("gesturestart", (e) => e.preventDefault());
+      document.addEventListener("gesturechange", (e) => e.preventDefault());
+      document.addEventListener("gestureend", (e) => e.preventDefault());
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      inicializarCuento();
+      configurarEventListeners();
+      
+      // Notificación de bienvenida
+      setTimeout(() => {
+        if (!localStorage.getItem(STORAGE_KEY)) {
+          mostrarNotificacion("¡Bienvenido! Comienza a crear tu cuento interactivo", "success");
+        }
+      }, 1000);
+      
+      // Registrar Service Worker si está disponible
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        navigator.serviceWorker.register('/mi-cuento3/service-worker.js')
+          .then(() => console.log('Service Worker registrado'))
+          .catch(err => console.log('Service Worker no registrado:', err));
+      }
+    });
+    
+    // Guardar al cerrar la página
+    window.addEventListener("beforeunload", () => {
+      guardarEnLocalStorage();
+    });
+  </script>
+</body>
+</html>
+<script>
+  // Verifica que la página cargue correctamente
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Cuento interactivo cargado en:', window.location.href);
+    
+    // Notificación de bienvenida
+    if (!localStorage.getItem('cuento_bienvenida')) {
+      alert('¡Bienvenido al Cuento Interactivo! ✨\n\nUsa las flechas o desliza para navegar.\nHaz clic en "Editar" para personalizar.');
+      localStorage.setItem('cuento_bienvenida', 'true');
+    }
+  });
+</script>
