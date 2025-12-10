@@ -811,7 +811,8 @@
                     <input type="file" accept="image/*" class="page-image hidden" data-index="${indice}">
                     <div class="upload-content">
                       <p class="text-sm text-gray-700 mb-1">📤 Arrastra una imagen o haz clic para seleccionar</p>
-                      <p class="text-xs text-gray-500">PNG, JPG o GIF • Máximo 2MB</p>
+                      <!-- MODIFICADO: Cambiado de 2MB a 5MB -->
+                      <p class="text-xs text-gray-500">PNG, JPG o GIF • Máximo 5MB</p>
                     </div>
                   </div>
                   <p class="text-xs text-gray-500 mt-2">Una imagen horizontal queda mejor. Puedes usar una URL o subir desde tu dispositivo.</p>
@@ -985,7 +986,7 @@
     function procesarImagen(archivo, indice) {
       // Validar tipo y tamaño
       const tiposPermitidos = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-      const tamanoMaximo = 2 * 1024 * 1024; // 2MB
+      const tamanoMaximo = 5 * 1024 * 1024; // MODIFICADO: Cambiado de 2MB a 5MB
       
       if (!tiposPermitidos.includes(archivo.type)) {
         alert("Solo se permiten imágenes (JPG, PNG, GIF, WebP)");
@@ -993,7 +994,7 @@
       }
       
       if (archivo.size > tamanoMaximo) {
-        alert("La imagen es demasiado grande. Máximo 2MB.");
+        alert("La imagen es demasiado grande. Máximo 5MB."); // MODIFICADO: Mensaje actualizado
         return;
       }
       
@@ -1348,15 +1349,3 @@
   </script>
 </body>
 </html>
-<script>
-  // Verifica que la página cargue correctamente
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Cuento interactivo cargado en:', window.location.href);
-    
-    // Notificación de bienvenida
-    if (!localStorage.getItem('cuento_bienvenida')) {
-      alert('¡Bienvenido al Cuento Interactivo! ✨\n\nUsa las flechas o desliza para navegar.\nHaz clic en "Editar" para personalizar.');
-      localStorage.setItem('cuento_bienvenida', 'true');
-    }
-  });
-</script>
